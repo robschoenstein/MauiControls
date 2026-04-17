@@ -1,0 +1,65 @@
+// Copyright © 2026 Robert Schoenstein. All rights reserved.
+// Unauthorized use, reproduction, or distribution is strictly prohibited.
+
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+
+namespace MauiControls.Extensions;
+
+internal static class ReflectionExtension
+{
+    private const char PropertyOfOp = '.';
+
+    public static object? GetValueByPath(this object obj, string path)
+    {
+        if (obj == null || string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+
+        var result = obj;
+
+        foreach (var token in path.Split(PropertyOfOp))
+        {
+            var resultType = result.GetType().GetProperty(token, BindingFlags.Public | BindingFlags.Instance);
+
+            result = resultType?.GetValue(result);
+
+            if (result == null)
+            {
+                return null;
+            }
+        }
+
+        return result;
+    }
+
+    public static Type? GetPropertyTypeByPath([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] this Type type, string path)
+    {
+        if (type == null)
+        {
+            return null;
+        }
+
+        if (path == "." || string.IsNullOrWhiteSpace(path))
+        {
+            return type;
+        }
+
+        var resultType = type;
+
+        foreach (var token in path.Split(PropertyOfOp))
+        {
+            var property = resultType.GetProperty(token, BindingFlags.Public | BindingFlags.Instance);
+
+            if (property == null)
+            {
+                return null;
+            }
+
+            resultType = property.PropertyType;
+        }
+
+        return resultType;
+    }
+}
