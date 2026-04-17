@@ -1,15 +1,16 @@
 # MauiControls Library
-This library contains controls I needed and didn't want to pay for... So, I wrote my own. Microslop REALLY dropped the ball on this.~~~~
+This library contains controls I needed and didn't want to pay for... So, I wrote my own. Microslop REALLY dropped the ball on this.
 
+**This is a WIP and functionality could change in the future.**
 ## How to use:
 Just look at the examples. It's pretty self-explanatory.
 
 ### ToggleButton
 ```xml
 <controls:ToggleButton 
-    IsToggled="{Binding IsEnabled}"
-    OnText="Enabled"
-    OffText="Disabled"
+    IsToggled="{Binding IsButtonToggled}"
+    OnText="On"
+    OffText="Off"
     OnBackgroundColor="Green"
     OffBackgroundColor="Gray"
     Command="{Binding ToggleCommand}" />
@@ -43,7 +44,7 @@ I did this one in a hurry and still need to finish fleshing out the styling. For
 <Label Text="{Binding SelectedCustomer.FullName}" />
 ```
 
-#### ViewModel
+#### ViewModel:
 ```csharp
 using CommunityToolkit.Mvvm.ComponentModel;
 using Maui.ViewModels.Base;
@@ -80,42 +81,49 @@ namespace Maui.ViewModels
 ## DataGrid
 I borrowed some of the code from another repo... I don't remember where, but I'll give them credit when I do.
 
-**This is a WIP and functionality could change in the future.**
+There are a LOT more options that I don't currently have time to document.
 
-There are a LOT more options that I haven't had a chance to document.
-
-#### Basic usage:~~~~
+#### Basic usage:
 ```xml
-<dg:DataGrid x:Name="UsersDataGrid"
-                   ItemsSource="{Binding Users}"
-                   SelectionMode="Single"
-                   FilteringEnabled="False"
-                   SelectedItem="{Binding SelectedUser}"
-                   PaginationEnabled="True">
-    <dg:DataGrid.Columns>
-        <dg:DataGridColumn Title="First Name"
-                           PropertyName="FirstName"
-                           SortingEnabled="True"
-                           FilteringEnabled="True"
-                           ToolTipProperties.Text="How do you not know what First Name means?"/>
-        <dg:DataGridColumn Title="Last Name"
-                           PropertyName="LastName"
-                           SortingEnabled="True"
-                           FilteringEnabled="True" />
-        <dg:DataGridColumn Title="User Name"
-                           PropertyName="UserName"
-                           SortingEnabled="True"
-                           FilteringEnabled="True" />
-        <dg:DataGridColumn Title="Account Active"
-                           PropertyName="IsActive"
-                           SortingEnabled="True"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Client.Views"
+             xmlns:mc="clr-namespace:MauiControls;assembly=MauiControls"
+             x:Class="Client.Views.ManageUsersView"
+             x:DataType="vm:ManageUsersViewModel">
+    <ContentPage.Content>        
+        <mc:DataGrid x:Name="UsersDataGrid"
+                           ItemsSource="{Binding Users}"
+                           SelectionMode="Single"
                            FilteringEnabled="False"
-                           ToolTipProperties.Text="Is user account active."/>
-        <dg:DataGridColumn Title="Account Lockout"
-                           PropertyName="LockoutEnabled"
-                           SortingEnabled="True"
-                           FilteringEnabled="False" 
-                           ToolTipProperties.Text="Is user currently locked out due to invalid login attempts."/>
-    </dg:DataGrid.Columns>
-</dg:DataGrid>
+                           SelectedItem="{Binding SelectedUser}"
+                           PaginationEnabled="True">
+            <mc:DataGrid.Columns>
+                <mc:DataGridColumn Title="First Name"
+                                   PropertyName="FirstName"
+                                   SortingEnabled="True"
+                                   FilteringEnabled="True"
+                                   ToolTipProperties.Text="How do you not know what First Name means?"/>
+                <mc:DataGridColumn Title="Last Name"
+                                   PropertyName="LastName"
+                                   SortingEnabled="True"
+                                   FilteringEnabled="True" />
+                <mc:DataGridColumn Title="User Name"
+                                   PropertyName="UserName"
+                                   SortingEnabled="True"
+                                   FilteringEnabled="True" />
+                <mc:DataGridColumn Title="Account Active"
+                                   PropertyName="IsActive"
+                                   SortingEnabled="True"
+                                   FilteringEnabled="False"
+                                   ToolTipProperties.Text="Is user account active."/>
+                <mc:DataGridColumn Title="Account Lockout"
+                                   PropertyName="LockoutEnabled"
+                                   SortingEnabled="True"
+                                   FilteringEnabled="False" 
+                                   ToolTipProperties.Text="Is user currently locked out due to invalid login attempts."/>
+            </mc:DataGrid.Columns>
+        </mc:DataGrid>
+    </ContentPage.Content>
+</ContentPage>
 ```

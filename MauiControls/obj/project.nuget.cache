@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "EF1QDpCIrqo=",
+  "dgSpecHash": "w5vQftT6HFc=",
   "success": true,
   "projectFilePath": "/home/rob/projects/RiderProjects/MauiControls/MauiControls/MauiControls.csproj",
   "expectedPackageFiles": [
@@ -117,15 +117,5 @@
     "/home/rob/.nuget/packages/xamarin.kotlinx.serialization.core/1.9.0.1/xamarin.kotlinx.serialization.core.1.9.0.1.nupkg.sha512",
     "/home/rob/.nuget/packages/xamarin.kotlinx.serialization.core.jvm/1.9.0.1/xamarin.kotlinx.serialization.core.jvm.1.9.0.1.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json.",
-      "projectPath": "/home/rob/projects/RiderProjects/MauiControls/MauiControls/MauiControls.csproj",
-      "warningLevel": 1,
-      "filePath": "/home/rob/projects/RiderProjects/MauiControls/MauiControls/MauiControls.csproj",
-      "targetGraphs": []
-    }
-  ]
+  "logs": []
 }
