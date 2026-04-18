@@ -7,26 +7,39 @@ using MauiControls.Extensions;
 namespace MauiControls;
 
 /// <summary>
-/// Enterprise-grade ToggleButton control implemented entirely in C# (no XAML).
-/// Supports two-state toggling with full styling and command support.
+/// ToggleButton control.
+/// - Defaults to Label control for CheckedText/UncheckedText.
+/// - Fully overrideable with any control inheriting from <see cref="View"/> via CheckedContent/UncheckedContent.
 /// </summary>
-public class ToggleButton : Border
+public class ToggleButton : ContentView
 {
-    private readonly Label _label;
+    #region Bindable Properties
 
-    #region Bindable Properties using BindablePropertyExtension
-
-    public static readonly BindableProperty IsToggledProperty =
+    public static readonly BindableProperty CheckedProperty =
         BindablePropertyExtension.Create<ToggleButton, bool>(
             defaultValue: false,
             defaultBindingMode: BindingMode.TwoWay,
-            propertyChanged: (b, _, n) => ((ToggleButton)b).OnIsToggledChanged((bool)n));
+            propertyChanged: OnCheckedChanged);
 
-    public static readonly BindableProperty OnTextProperty =
-        BindablePropertyExtension.Create<ToggleButton, string>(defaultValue: "ON");
+    public static readonly BindableProperty CheckedTextProperty =
+        BindablePropertyExtension.Create<ToggleButton, string>(
+            defaultValue: "On",
+            propertyChanged: OnTextChanged);
 
-    public static readonly BindableProperty OffTextProperty =
-        BindablePropertyExtension.Create<ToggleButton, string>(defaultValue: "OFF");
+    public static readonly BindableProperty UncheckedTextProperty =
+        BindablePropertyExtension.Create<ToggleButton, string>(
+            defaultValue: "Off",
+            propertyChanged: OnTextChanged);
+    
+    public static readonly BindableProperty CheckedContentProperty =
+        BindablePropertyExtension.Create<ToggleButton, View>(
+            defaultValue: null,
+            propertyChanged: OnContentChanged);
+
+    public static readonly BindableProperty UncheckedContentProperty =
+        BindablePropertyExtension.Create<ToggleButton, View>(
+            defaultValue: null,
+            propertyChanged: OnContentChanged);
 
     public static readonly BindableProperty OnBackgroundColorProperty =
         BindablePropertyExtension.Create<ToggleButton, Color>(defaultValue: Colors.Green);
@@ -34,12 +47,17 @@ public class ToggleButton : Border
     public static readonly BindableProperty OffBackgroundColorProperty =
         BindablePropertyExtension.Create<ToggleButton, Color>(defaultValue: Colors.Gray);
 
-    public static readonly BindableProperty OnTextColorProperty =
+    public static readonly BindableProperty CheckedTextColorProperty =
         BindablePropertyExtension.Create<ToggleButton, Color>(defaultValue: Colors.White);
 
-    public static readonly BindableProperty OffTextColorProperty =
+    public static readonly BindableProperty UncheckedTextColorProperty =
         BindablePropertyExtension.Create<ToggleButton, Color>(defaultValue: Colors.Black);
-
+    
+    public static readonly BindableProperty CornerRadiusProperty =
+        BindablePropertyExtension.Create<ToggleButton, CornerRadius>(
+            defaultValue: new CornerRadius(8),
+            propertyChanged: OnCornerRadiusChanged);
+    
     public static readonly BindableProperty CommandProperty =
         BindablePropertyExtension.Create<ToggleButton, ICommand>(defaultValue: null);
 
@@ -50,48 +68,66 @@ public class ToggleButton : Border
 
     #region Public Properties
 
-    public bool IsToggled
+    public bool Checked
     {
-        get => (bool)GetValue(IsToggledProperty);
-        set => SetValue(IsToggledProperty, value);
+        get => (bool)GetValue(CheckedProperty);
+        set => SetValue(CheckedProperty, value);
     }
 
-    public string OnText
+    public string CheckedText
     {
-        get => (string)GetValue(OnTextProperty);
-        set => SetValue(OnTextProperty, value);
+        get => (string)GetValue(CheckedTextProperty);
+        set => SetValue(CheckedTextProperty, value);
     }
 
-    public string OffText
+    public string UncheckedText
     {
-        get => (string)GetValue(OffTextProperty);
-        set => SetValue(OffTextProperty, value);
+        get => (string)GetValue(UncheckedTextProperty);
+        set => SetValue(UncheckedTextProperty, value);
+    }
+    
+    public View CheckedContent
+    {
+        get => (View)GetValue(CheckedContentProperty);
+        set => SetValue(CheckedContentProperty, value);
     }
 
-    public Color OnBackgroundColor
+    public View UncheckedContent
+    {
+        get => (View)GetValue(UncheckedContentProperty);
+        set => SetValue(UncheckedContentProperty, value);
+    }
+
+    public Color CheckedBackgroundColor
     {
         get => (Color)GetValue(OnBackgroundColorProperty);
         set => SetValue(OnBackgroundColorProperty, value);
     }
 
-    public Color OffBackgroundColor
+    public Color UncheckedBackgroundColor
     {
         get => (Color)GetValue(OffBackgroundColorProperty);
         set => SetValue(OffBackgroundColorProperty, value);
     }
 
-    public Color OnTextColor
+    public Color CheckedTextColor
     {
-        get => (Color)GetValue(OnTextColorProperty);
-        set => SetValue(OnTextColorProperty, value);
+        get => (Color)GetValue(CheckedTextColorProperty);
+        set => SetValue(CheckedTextColorProperty, value);
     }
 
-    public Color OffTextColor
+    public Color UncheckedTextColor
     {
-        get => (Color)GetValue(OffTextColorProperty);
-        set => SetValue(OffTextColorProperty, value);
+        get => (Color)GetValue(UncheckedTextColorProperty);
+        set => SetValue(UncheckedTextColorProperty, value);
     }
-
+    
+    public CornerRadius CornerRadius
+    {
+        get => (CornerRadius)GetValue(CornerRadiusProperty);
+        set => SetValue(CornerRadiusProperty, value);
+    }
+    
     public ICommand Command
     {
         get => (ICommand)GetValue(CommandProperty);
@@ -108,19 +144,6 @@ public class ToggleButton : Border
 
     public ToggleButton()
     {
-        _label = new Label
-        {
-            HorizontalOptions = LayoutOptions.Center,
-            VerticalOptions = LayoutOptions.Center,
-            FontAttributes = FontAttributes.Bold
-        };
-
-        Content = _label;
-        Stroke = Colors.Gray;
-        StrokeThickness = 1;
-        Padding = new Thickness(12, 8);
-        BackgroundColor = OffBackgroundColor; // initial state
-
         // Tap gesture to toggle
         var tap = new TapGestureRecognizer();
         tap.Tapped += OnTapped;
@@ -131,33 +154,57 @@ public class ToggleButton : Border
 
     private void OnTapped(object sender, EventArgs e)
     {
-        IsToggled = !IsToggled;
+        Checked = !Checked;
     }
 
-    private void OnIsToggledChanged(bool newValue)
+    private static void OnCheckedChanged(BindableObject obj, bool oldValue, bool newValue)
     {
-        UpdateVisualState();
-
-        // Execute command if set
-        if (Command?.CanExecute(CommandParameter) == true)
-        {
-            Command.Execute(CommandParameter);
-        }
+        var control = (ToggleButton)obj;
+        control.UpdateVisualState();
+        control.Command?.Execute(control.CommandParameter);
+    }
+    
+    private static void OnTextChanged(BindableObject obj, string oldValue, string newValue)
+    {
+        var control = (ToggleButton)obj;
+        control.UpdateVisualState();
     }
 
+    private static void OnContentChanged(BindableObject obj, View? oldValue, View? newValue)
+    {
+        var control = (ToggleButton)obj;
+        control.UpdateVisualState();
+    }
+
+    private static void OnCornerRadiusChanged(BindableObject obj, CornerRadius oldValue, CornerRadius newValue)
+    {
+        var control = (ToggleButton)obj;
+        control.UpdateVisualState();
+    }
+    
     private void UpdateVisualState()
     {
-        if (IsToggled)
+        if (Checked)
         {
-            BackgroundColor = OnBackgroundColor;
-            _label.Text = OnText;
-            _label.TextColor = OnTextColor;
+            BackgroundColor = CheckedBackgroundColor;
+
+            Content = CheckedContent ?? new Label 
+            { 
+                Text = CheckedText, 
+                TextColor = CheckedTextColor,
+                VerticalOptions = LayoutOptions.Center 
+            };
         }
         else
         {
-            BackgroundColor = OffBackgroundColor;
-            _label.Text = OffText;
-            _label.TextColor = OffTextColor;
+            BackgroundColor = UncheckedBackgroundColor;
+            
+            Content = UncheckedContent ?? new Label 
+            { 
+                Text = UncheckedText, 
+                TextColor = UncheckedTextColor,
+                VerticalOptions = LayoutOptions.Center 
+            };
         }
     }
 }

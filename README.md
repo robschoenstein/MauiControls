@@ -5,19 +5,75 @@ This library contains controls I needed and didn't want to pay for... So, I wrot
 ## How to use:
 Just look at the examples. It's pretty self-explanatory.
 
-### ToggleButton
+### ToggleButton~~~~
+
+#### Basic Usage (Text):
 ```xml
-<controls:ToggleButton 
-    IsToggled="{Binding IsButtonToggled}"
-    OnText="On"
-    OffText="Off"
-    OnBackgroundColor="Green"
-    OffBackgroundColor="Gray"
-    Command="{Binding ToggleCommand}" />
+<controls:ToggleButton
+        Checked="{Binding IsChecked, Mode=TwoWay}"
+        CheckedText="Checked"
+        UncheckedText="Unchecked"
+        Command="{Binding ToggleCommand}" />
 ```
 
+#### Advanced Usage (Custom Content)
+```xml
+<controls:ToggleButton
+        Checked="{Binding IsChecked, Mode=TwoWay}"
+        Command="{Binding ToggleCommand}">
+
+    <controls:ToggleButton.CheckedContent>
+        <Image Source="checked_icon.png"
+               WidthRequest="28" HeightRequest="28" />
+    </controls:ToggleButton.CheckedContent>
+
+    <controls:ToggleButton.UncheckedContent>
+        <Image Source="unchecked_icon.png"
+               WidthRequest="28" HeightRequest="28" />
+    </controls:ToggleButton.UncheckedContent>
+</controls:ToggleButton>
+```
+
+#### Available Properties:
+| Property | Type     | Default | Description                                    |
+| -------- |----------|---------|------------------------------------------------|
+| Checked | bool     | false   | Current toggle state (TwoWay binding)          |
+| CheckedText | string   | "On"    | Text shown when checked (if no custom content) |
+| UncheckedText | string   | "Off"   | Text shown when unchecked                      |
+| CheckedContent | View     | null    | Custom content when checked                    | 
+| UncheckedContent | View     | null    | Custom content when unchecked                  |
+| CheckedBackgroundColor | Color    | Green   | Background color when checked |
+| UncheckedBackgroundColor | Color    | Gray    | Background color when unchecked |
+| CheckedTextColor | Color    | White   | Text color when checked |
+| UncheckedTextColor | Color    | Black   | Text color when unchecked |
+| CornerRadius | CornerRadius | 8 | Button corner radius |
+| Command | ICommand | null    | Executed when toggled |
+| CommandParameter | object   | null    | Parameter passed to Command |
+
+#### ViewModel:
+```csharp
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace Maui.ViewModels
+{
+    public partial class ToggleButonViewModel
+    {
+        [ObservableProperty]
+        private bool isChecked;
+
+        //ctor and whatever else...
+        
+        [RelayCommand]
+        private void Toggle()
+        {
+            // Optional logic when toggle changes
+            Console.WriteLine($"Toggle state changed to: {IsChecked}");
+        }
+    }
+}
+```
 ### ComboBox
-I did this one in a hurry and still need to finish fleshing out the styling. For now...
+I did this one in a hurry and still need to finish fleshing out the styling.
 
 #### ComboBox Entry Style:
 ```xml
@@ -47,13 +103,12 @@ I did this one in a hurry and still need to finish fleshing out the styling. For
 #### ViewModel:
 ```csharp
 using CommunityToolkit.Mvvm.ComponentModel;
-using Maui.ViewModels.Base;
 using Shared.Models;           // Assuming your shared models live here
 using System.Collections.ObjectModel;
 
 namespace Maui.ViewModels
 {
-    public partial class CustomerComboBoxViewModel : ViewModelBase
+    public partial class CustomerComboBoxViewModel
     {
         //Before you ask, CustomerDto is a data Model. You should know this.
         [ObservableProperty]
@@ -65,8 +120,7 @@ namespace Maui.ViewModels
         [ObservableProperty]
         private bool isDropDownOpen;
 
-        public CustomerComboBoxViewModel(INavigationService navigationService)
-            : base(navigationService)
+        public CustomerComboBoxViewModel()
         {
             // Sample data
             Customers.Add(new CustomerDto { Id = Guid.NewGuid(), FullName = "John Smith", Email = "john.smith@marklar.com" });

@@ -7,55 +7,52 @@ namespace MauiControls.DataGridInternals;
 
 internal sealed class DataGridCell : ContentView
 {
+    public DataGridColumn Column { get; }
+    public bool IsEditing { get; }
+    
     internal DataGridCell(View cellContent, Color? backgroundColor, DataGridColumn column, bool isEditing)
     {
+        Column = column;
+        IsEditing = isEditing;
+        
+        //TODO: Make sure this doesn't screw with child controls
+        BackgroundColor = backgroundColor;
+        
         Content = new ContentView
         {
             BackgroundColor = backgroundColor,
             Content = cellContent,
         };
-
-        Column = column;
-        IsEditing = isEditing;
+        
+        SetupAccessibility();
     }
-
-    public DataGridColumn Column { get; }
-
-    public bool IsEditing { get; }
 
     internal void UpdateBindings(DataGrid dataGrid)
     {
-        // This approach is a hack to avoid needing a slow Border control.
-        // The padding constitutes the cell's border thickness.
-        // And the BackgroundColor constitutes the border color of the cell.
         if (dataGrid.HeaderBordersVisible)
         {
-#if NET9_0_OR_GREATER
-            SetBinding(BackgroundColorProperty, BindingBase.Create<DataGrid, Color>(static x => x.BorderColor, source: dataGrid));
-            SetBinding(PaddingProperty, BindingBase.Create<DataGrid, Thickness>(static x => x.BorderThickness, converter: new BorderThicknessToCellPaddingConverter(), source: dataGrid));
-#else
             SetBinding(BackgroundColorProperty, new Binding(nameof(DataGrid.BorderColor), source: dataGrid));
             SetBinding(PaddingProperty, new Binding(nameof(DataGrid.BorderThickness), converter: new BorderThicknessToCellPaddingConverter(), source: dataGrid));
-#endif
         }
         else
         {
             RemoveBinding(BackgroundColorProperty);
             RemoveBinding(PaddingProperty);
-
-            Padding = 0;
+            Padding = Thickness.Zero;
         }
     }
 
     internal void UpdateCellBackgroundColor(Color? bgColor)
     {
-        foreach (var child in ((IVisualTreeElement)this).GetVisualChildren())
+        //Set this controls background color
+        this.BackgroundColor = bgColor;
+        
+        if (Content is ContentView cv)
         {
-            if (child is ContentView cellContent)
-            {
-                cellContent.BackgroundColor = bgColor;
-            }
+            cv.BackgroundColor = bgColor;
         }
+        
+        //TODO: May want to make sure this cascades down all contentview child controls since cell templates can be utilized.
     }
 
     internal void UpdateCellTextColor(Color? textColor)
@@ -67,5 +64,10 @@ internal sealed class DataGridCell : ContentView
                 label.TextColor = textColor;
             }
         }
+    }
+    
+    private void SetupAccessibility()
+    {
+        SemanticProperties.SetDescription(this, $"Cell for column {Column.Title}");
     }
 }
