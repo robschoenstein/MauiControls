@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
 using MauiControls.Collections;
+using MauiControls.Converters;
 using MauiControls.DataGridInternals;
 using MauiControls.DataSorting;
 using MauiControls.Extensions;
@@ -272,6 +273,24 @@ public class DataGrid : Grid
     {
         get => (ICommand)GetValue(RowTappedCommandProperty);
         set => SetValue(RowTappedCommandProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the command executed when the selection changes.
+    /// </summary>
+    public ICommand? SelectionChangedCommand
+    {
+        get => (ICommand?)GetValue(SelectionChangedCommandProperty);
+        set => SetValue(SelectionChangedCommandProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the parameter passed to <see cref="SelectionChangedCommand"/>.
+    /// </summary>
+    public object? SelectionChangedCommandParameter
+    {
+        get => GetValue(SelectionChangedCommandParameterProperty);
+        set => SetValue(SelectionChangedCommandParameterProperty, value);
     }
 
     /// <summary>
@@ -676,6 +695,23 @@ public class DataGrid : Grid
     /// </summary>
     public static readonly BindableProperty RowTappedCommandProperty =
         BindablePropertyExtension.Create<DataGrid, ICommand>();
+
+    /// <summary>
+    /// Gets or sets the command to execute when the selection changes in the DataGrid.
+    /// This is the modern MVVM-friendly equivalent of the SelectionChanged event.
+    /// </summary>
+    /// <remarks>
+    /// Security: Command execution is protected by CanExecute check before invocation.
+    /// Performance: Fires only on actual selection change – no extra overhead.
+    /// </remarks>
+    public static readonly BindableProperty SelectionChangedCommandProperty =
+        BindablePropertyExtension.Create<DataGrid, ICommand?>();
+
+    /// <summary>
+    /// Gets or sets the parameter to pass to <see cref="SelectionChangedCommand"/>.
+    /// </summary>
+    public static readonly BindableProperty SelectionChangedCommandParameterProperty =
+        BindablePropertyExtension.Create<DataGrid, object?>();
 
     /// <summary>
     /// Gets or sets the background color of the footer.
@@ -1304,7 +1340,7 @@ public class DataGrid : Grid
     #endregion
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DataGrid_Xaml"/> class.
+    /// Initializes a new instance of the <see cref="DataGrid"/> class.
     /// </summary>
     public DataGrid()
     {
@@ -1319,9 +1355,6 @@ public class DataGrid : Grid
         CreateHeader();
         CreateRowContentContainer();
         CreateFooter();
-
-        //TODO: Left off here. Need to finish creating the control. Use ComboBox.cs as an example.
-        //TODO: Initialize controls (region: DisplayControls).
     }
 
     /// <summary>
@@ -1486,7 +1519,7 @@ public class DataGrid : Grid
         };
 
         _dataGridHeaderRow.SetBinding(DataGridHeaderRow.HeightRequestProperty,
-            "HeaderHeight");
+            nameof(HeaderHeight));
 
         this.Add(_dataGridHeaderRow, 0, 0);
     }
@@ -1500,15 +1533,15 @@ public class DataGrid : Grid
         };
 
         _refreshView.SetBinding(RefreshView.CommandProperty,
-            "PullToRefreshCommand");
+            nameof(PullToRefreshCommand));
         _refreshView.SetBinding(RefreshView.CommandParameterProperty,
-            "PullToRefreshCommandParameter");
+            nameof(PullToRefreshCommandParameter));
         _refreshView.SetBinding(RefreshView.RefreshColorProperty,
-            "RefreshColor");
+            nameof(RefreshColor));
         _refreshView.SetBinding(RefreshView.IsRefreshingProperty,
-            "IsRefreshing");
+            nameof(IsRefreshing));
         _refreshView.SetBinding(RefreshView.IsEnabledProperty,
-            "RefreshingEnabled", BindingMode.TwoWay);
+            nameof(RefreshingEnabled), BindingMode.TwoWay);
 
         this.Add(_refreshView, 0, 1);
 
@@ -1518,19 +1551,22 @@ public class DataGrid : Grid
             BindingContext = this
         };
 
-        //TODO: May want a two-way binding if we add deletion to the grid...
         _rowCollectionView.ItemsSource = InternalItems;
 
         _rowCollectionView.SetBinding(CollectionView.BackgroundColorProperty,
-            "BackgroundColor");
+            nameof(BackgroundColor));
         _rowCollectionView.SetBinding(SelectableItemsView.SelectedItemProperty,
-            "SelectedItem", BindingMode.TwoWay);
-        _rowCollectionView.SetBinding(SelectableItemsView.SelectionChangedCommandProperty,
-            "SelectedItems", BindingMode.TwoWay);
+            nameof(SelectedItem), BindingMode.TwoWay);
+        _rowCollectionView.SetBinding(SelectableItemsView.SelectedItemsProperty,
+            nameof(SelectedItems), BindingMode.TwoWay);
         _rowCollectionView.SetBinding(StructuredItemsView.ItemSizingStrategyProperty,
-            "ItemSizingStrategy");
+            nameof(ItemSizingStrategy));
+        _rowCollectionView.SetBinding(SelectableItemsView.SelectionModeProperty,
+            nameof(SelectionMode));
         _rowCollectionView.SetBinding(SelectableItemsView.SelectionChangedCommandProperty,
-            "SelectionMode");
+            nameof(SelectionChangedCommand));
+        _rowCollectionView.SetBinding(SelectableItemsView.SelectionChangedCommandParameterProperty,
+            nameof(SelectionChangedCommandParameter));
 
         var innerCollectionItemTemplate = new DataTemplate(() =>
         {
@@ -1540,8 +1576,10 @@ public class DataGrid : Grid
                 DataGrid = this
             };
 
-            dataGridRow.SetBinding(DataGridRow.RowToEditProperty, "RowToEdit");
-            dataGridRow.SetBinding(DataGridRow.HeightRequestProperty, "RowHeight");
+            dataGridRow.SetBinding(DataGridRow.RowToEditProperty,
+                nameof(RowToEdit));
+            dataGridRow.SetBinding(DataGridRow.HeightRequestProperty,
+                nameof(RowHeight));
 
             return dataGridRow;
         });
@@ -1575,7 +1613,7 @@ public class DataGrid : Grid
         };
 
         _pageSizeLayout.SetBinding(HorizontalStackLayout.IsVisibleProperty,
-            "PageSizeVisible");
+            nameof(PageSizeVisible));
 
         _footerGrid.Add(_pageSizeLayout, 0, 0);
 
@@ -1588,9 +1626,9 @@ public class DataGrid : Grid
         };
 
         _perPageText.SetBinding(Label.TextProperty,
-            "PerPageText");
+            nameof(PerPageText));
         _perPageText.SetBinding(Label.TextColorProperty,
-            "FooterTextColor");
+            nameof(FooterTextColor));
 
         _pageSizeLayout.Add(_perPageText);
 
@@ -1602,13 +1640,13 @@ public class DataGrid : Grid
         };
 
         _pagePicker.SetBinding(Picker.ItemsSourceProperty,
-            "PageSizeList", BindingMode.TwoWay);
+            nameof(PageSizeList), BindingMode.TwoWay);
         _pagePicker.SetBinding(Picker.SelectedItemProperty,
-            "PageSize");
+            nameof(PageSize), BindingMode.TwoWay);
         _pagePicker.SetBinding(Picker.TextColorProperty,
-            "FooterTextColor");
+            nameof(FooterTextColor));
         _pagePicker.SetBinding(Picker.TitleColorProperty,
-            "FooterTextColor");
+            nameof(FooterTextColor));
 
         _pageSizeLayout.Add(_pagePicker);
 
@@ -1631,9 +1669,9 @@ public class DataGrid : Grid
         };
 
         _pageText.SetBinding(Label.TextProperty,
-            "PageText");
+            nameof(PageText));
         _pageText.SetBinding(Label.TextColorProperty,
-            "TextColor");
+            nameof(FooterTextColor));
 
         _pagingLayout.Add(_pageText);
 
@@ -1644,10 +1682,20 @@ public class DataGrid : Grid
             VerticalTextAlignment = TextAlignment.Center
         };
 
-        _pageNumber.SetBinding(Label.TextProperty,
-            "PageText");
+        var pageMultiBinding = new MultiBinding
+        {
+            Bindings =
+            {
+                new Binding(nameof(PageNumber)),
+                new Binding(nameof(PageCount))
+            },
+            Converter = new PageDisplayConverter(),
+            ConverterParameter = null // uses default "Page {0} of {1}" – can be overridden per instance
+        };
+
+        _pageNumber.SetBinding(Label.TextProperty, pageMultiBinding);
         _pageNumber.SetBinding(Label.TextColorProperty,
-            "FooterTextColor");
+            nameof(FooterTextColor));
 
         _pagingLayout.Add(_pageNumber);
 
@@ -1659,9 +1707,9 @@ public class DataGrid : Grid
         };
 
         _pagingStepper.SetBinding(Stepper.ValueProperty,
-            "PageNumber");
+            nameof(PageNumber));
         _pagingStepper.SetBinding(Stepper.StyleProperty,
-            "PaginationStepperStyle");
+            nameof(PaginationStepperStyle));
 
         _pagingLayout.Add(_pagingStepper);
     }

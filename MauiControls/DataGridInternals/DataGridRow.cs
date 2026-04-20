@@ -1,10 +1,10 @@
 // Copyright © 2026 Robert Schoenstein. All rights reserved.
 // Unauthorized use, reproduction, or distribution is strictly prohibited.
 
-using MauiControls.DataGridInternals;
+using MauiControls.Behaviors;
 using MauiControls.Extensions;
 
-namespace MauiControls;
+namespace MauiControls.DataGridInternals;
 
 internal sealed class DataGridRow : Grid
 {
@@ -102,7 +102,8 @@ internal sealed class DataGridRow : Grid
     #region Fields
 
     private bool _wasSelected;
-
+    private readonly Dictionary<int, DataGridCell> _cellPool = new();
+    
     #endregion Fields
 
     #region Properties
@@ -171,11 +172,8 @@ internal sealed class DataGridRow : Grid
                 column.VisibilityChanged += OnVisibilityChanged;
             }
 
-#if NET9_0_OR_GREATER
-            SetBinding(BackgroundColorProperty, BindingBase.Create<DataGrid, Color>(static x => x.BorderColor, source: DataGrid));
-#else
-            SetBinding(BackgroundColorProperty, new Binding(nameof(DataGrid.BorderColor), source: DataGrid));
-#endif
+            SetBinding(BackgroundColorProperty, 
+                new Binding(nameof(DataGrid.BorderColor), source: DataGrid));
         }
     }
 
@@ -187,10 +185,7 @@ internal sealed class DataGridRow : Grid
 
     private void InitializeRow()
     {
-        Children.Clear(); // TODO: Revisit this if and when virtualization is straightened out in the underlying MAUI CollectionView control
-
         UpdateSelectedState();
-
         UpdateColors();
 
         var columns = DataGrid.Columns;
@@ -198,12 +193,13 @@ internal sealed class DataGridRow : Grid
         if (columns == null || columns.Count == 0)
         {
             ColumnDefinitions.Clear();
+            _cellPool.Clear();
             Children.Clear();
+            
             return;
         }
 
         var isEditing = RowToEdit == BindingContext;
-
         var columnCount = columns.Count;
 
         for (var i = 0; i < columnCount; i++)
@@ -223,27 +219,35 @@ internal sealed class DataGridRow : Grid
                 continue;
             }
 
-            if (Children.TryGetItem(i, out var existingChild))
+            if (_cellPool.TryGetValue(i, out var existingCell) &&
+                existingCell.Column == col &&
+                existingCell.IsEditing == isEditing)
             {
-                if (existingChild is not DataGridCell existingCell)
-                {
-                    throw new InvalidDataException($"{nameof(DataGridRow)} should only contain {nameof(DataGridCell)}s");
-                }
-
-                if (existingCell.Column != col || existingCell.IsEditing != isEditing)
-                {
-                    Children[i] = GenerateCellForColumn(col, i);
-                }
+                existingCell.UpdateBindings(DataGrid); // reuse
             }
             else
             {
                 var newCell = GenerateCellForColumn(col, i);
-                Children.Add(newCell);
+                _cellPool[i] = newCell;
+
+                if (i < Children.Count)
+                    Children[i] = newCell;
+                else
+                    Children.Add(newCell);
             }
         }
 
         // Remove extra columns, if any
         ColumnDefinitions.RemoveAfter(columnCount);
+        
+        // Remove any excess pooled cells that are no longer needed
+        var keysToRemove = 
+            _cellPool.Keys.Where(k => k >= columnCount).ToList();
+        
+        foreach (var k in keysToRemove)
+        {
+            _cellPool.Remove(k);
+        }
     }
 
     private DataGridCell GenerateCellForColumn(DataGridColumn col, int columnIndex)
@@ -389,13 +393,13 @@ internal sealed class DataGridRow : Grid
             Keyboard = Keyboard.Numeric,
         };
 
-        entry.TextChanged += (s, e) =>
+        // NEW: Attach reusable, high-performance NumericValidationBehavior
+        // This is far more efficient and safer than mutating Text in TextChanged
+        entry.Behaviors.Add(new NumericValidationBehavior
         {
-            if (!string.IsNullOrEmpty(e.NewTextValue) && !numericParser(e.NewTextValue))
-            {
-                ((Entry)s!).Text = e.OldTextValue;
-            }
-        };
+            NumericParser = numericParser,
+            ErrorMessage = $"Invalid {col.DataType?.Name ?? "numeric"} value"
+        });
 
         SetBinding(col, entry, Entry.TextProperty);
 

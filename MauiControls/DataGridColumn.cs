@@ -248,8 +248,7 @@ public sealed class DataGridColumn : Element, IDefinition
         };
         
         FilterTextbox.SetBinding(Entry.TextProperty, 
-            BindingBase.Create<DataGridColumn, string>(static x =>
-                x.FilterText, BindingMode.TwoWay, source: this));
+            new Binding(nameof(FilterText), BindingMode.TwoWay, source: this));
     }
 
     #region Events
