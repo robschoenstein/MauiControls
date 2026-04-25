@@ -1,9 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net10.0-android</TargetFrameworks>
-        <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
-        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
+        <!-- Main targets -->
+        <TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+
+        <!-- Linux only supports Android -->
+        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Linux'))">net10.0-android</TargetFrameworks>
+
+        <!-- Windows gets the full set -->
+        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+            $(TargetFrameworks);net10.0-windows10.0.19041.0
+        </TargetFrameworks>
 
         <UseMaui>true</UseMaui>
         <SingleProject>true</SingleProject>
@@ -26,11 +33,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="obj\" />
+        <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.51" />
     </ItemGroup>
 
 </Project>
