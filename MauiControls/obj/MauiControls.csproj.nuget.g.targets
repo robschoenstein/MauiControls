@@ -83,18 +83,4 @@
     <Import Project="$(NuGetPackageRoot)microsoft.maui.core/10.0.51/buildTransitive/Microsoft.Maui.Core.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.core/10.0.51/buildTransitive/Microsoft.Maui.Core.targets')" />
     <Import Project="$(NuGetPackageRoot)microsoft.maui.controls.build.tasks/10.0.51/buildTransitive/netstandard2.0/Microsoft.Maui.Controls.Build.Tasks.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.controls.build.tasks/10.0.51/buildTransitive/netstandard2.0/Microsoft.Maui.Controls.Build.Tasks.targets')" />
   </ImportGroup>
-  <ImportGroup Condition=" '$(TargetFramework)' == 'net10.0-ios' AND '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.resizetizer/10.0.51/buildTransitive/Microsoft.Maui.Resizetizer.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.resizetizer/10.0.51/buildTransitive/Microsoft.Maui.Resizetizer.targets')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.extensions.options/10.0.0/buildTransitive/net8.0/Microsoft.Extensions.Options.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.options/10.0.0/buildTransitive/net8.0/Microsoft.Extensions.Options.targets')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.extensions.logging.abstractions/10.0.0/buildTransitive/net8.0/Microsoft.Extensions.Logging.Abstractions.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.logging.abstractions/10.0.0/buildTransitive/net8.0/Microsoft.Extensions.Logging.Abstractions.targets')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.core/10.0.51/buildTransitive/Microsoft.Maui.Core.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.core/10.0.51/buildTransitive/Microsoft.Maui.Core.targets')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.controls.build.tasks/10.0.51/buildTransitive/net6.0-ios10.0/Microsoft.Maui.Controls.Build.Tasks.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.controls.build.tasks/10.0.51/buildTransitive/net6.0-ios10.0/Microsoft.Maui.Controls.Build.Tasks.targets')" />
-  </ImportGroup>
-  <ImportGroup Condition=" '$(TargetFramework)' == 'net10.0-maccatalyst' AND '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.resizetizer/10.0.51/buildTransitive/Microsoft.Maui.Resizetizer.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.resizetizer/10.0.51/buildTransitive/Microsoft.Maui.Resizetizer.targets')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.extensions.options/10.0.0/buildTransitive/net8.0/Microsoft.Extensions.Options.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.options/10.0.0/buildTransitive/net8.0/Microsoft.Extensions.Options.targets')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.extensions.logging.abstractions/10.0.0/buildTransitive/net8.0/Microsoft.Extensions.Logging.Abstractions.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.logging.abstractions/10.0.0/buildTransitive/net8.0/Microsoft.Extensions.Logging.Abstractions.targets')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.core/10.0.51/buildTransitive/Microsoft.Maui.Core.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.core/10.0.51/buildTransitive/Microsoft.Maui.Core.targets')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.controls.build.tasks/10.0.51/buildTransitive/net6.0-maccatalyst13.1/Microsoft.Maui.Controls.Build.Tasks.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.controls.build.tasks/10.0.51/buildTransitive/net6.0-maccatalyst13.1/Microsoft.Maui.Controls.Build.Tasks.targets')" />
-  </ImportGroup>
 </Project>
