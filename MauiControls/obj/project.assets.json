@@ -6001,6 +6001,12 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[10.0.5, 10.0.5]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.Android": {
             "privateAssets": "all"
@@ -6012,7 +6018,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.201/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.202/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",

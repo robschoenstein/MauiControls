@@ -6,8 +6,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using MauiControls.DataGridInternals;
 using MauiControls.DataSorting;
-using Microsoft.Maui.Controls.Shapes;
 using MauiControls.Extensions;
+using Microsoft.Maui.Controls.Shapes;
 
 namespace MauiControls;
 

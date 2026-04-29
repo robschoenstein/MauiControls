@@ -6,12 +6,12 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Input;
-using Microsoft.Maui.Controls.Shapes;
 using MauiControls.Collections;
 using MauiControls.Converters;
 using MauiControls.DataGridInternals;
 using MauiControls.DataSorting;
 using MauiControls.Extensions;
+using Microsoft.Maui.Controls.Shapes;
 using Font = Microsoft.Maui.Font;
 
 namespace MauiControls;
